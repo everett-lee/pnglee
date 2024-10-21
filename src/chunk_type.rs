@@ -69,6 +69,19 @@ impl Display for ChunkType {
 }
 
 
+impl TryFrom<[u8; 4]> for ChunkType {
+    type Error = anyhow::Error;
+
+
+    fn try_from(bytes: [u8; 4]) -> Result<Self> {
+        if !ChunkType::is_bytes_valid(bytes) {
+            return Err(anyhow!("Provided byte array not valid"));
+        }
+
+        Ok(ChunkType{b: bytes})
+    }
+}
+
 impl FromStr for ChunkType {
     type Err = anyhow::Error;
 
