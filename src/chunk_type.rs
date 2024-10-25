@@ -1,6 +1,6 @@
 
 use core::fmt;
-use std::{any, fmt::{Display, Formatter}, str::FromStr};
+use std::{fmt::{Display, Formatter}, str::FromStr};
 
 use anyhow::Result;
 use anyhow::anyhow;
@@ -12,7 +12,7 @@ pub struct ChunkType {
 
 
 impl ChunkType {
-    fn bytes(&self) -> [u8; 4] {
+    pub fn bytes(&self) -> [u8; 4] {
         self.b
     }
 
@@ -40,23 +40,23 @@ impl ChunkType {
         byte & mask == 0
     }
 
-    fn is_critical(&self) -> bool {
+    pub fn is_critical(&self) -> bool {
         self.is_bit_unset(0, 5)
     }
 
-    fn is_public(&self) -> bool {
+    pub fn is_public(&self) -> bool {
         self.is_bit_unset(1, 5)
     }    
     
-    fn is_reserved_bit_valid(&self) -> bool {
+    pub fn is_reserved_bit_valid(&self) -> bool {
         self.is_bit_unset(2, 5)
     }   
 
-    fn is_safe_to_copy(&self) -> bool {
+    pub fn is_safe_to_copy(&self) -> bool {
         !self.is_bit_unset(3, 5)
     }
     
-    fn is_valid(&self) -> bool {
+    pub fn is_valid(&self) -> bool {
         self.is_reserved_bit_valid() && ChunkType::is_bytes_valid(self.bytes())
     }
 }
@@ -67,7 +67,6 @@ impl Display for ChunkType {
         write!(f, "{}", s)
     }
 }
-
 
 impl TryFrom<[u8; 4]> for ChunkType {
     type Error = anyhow::Error;
