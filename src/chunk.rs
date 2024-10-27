@@ -1,6 +1,7 @@
 use core::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
+use std::io::Bytes;
 use crate::chunk_type::ChunkType;
 
 use anyhow::Result;
@@ -46,6 +47,11 @@ impl Chunk {
         Ok(res?)
     }
 
+    pub fn chunk_data_length(bytes: &[u8]) -> u32 {
+        let length_bytes = &bytes[..4];
+        u32::from_be_bytes(length_bytes.try_into().unwrap())
+    }
+
 }
 
 impl TryFrom<&[u8]> for Chunk {
@@ -57,8 +63,7 @@ impl TryFrom<&[u8]> for Chunk {
             return Err(anyhow!("PNG spec requires at least 12 bytes"));
         }
 
-        let length_bytes = &bytes[..4];
-        let length = u32::from_be_bytes(length_bytes.try_into().unwrap());
+        let length = Chunk::chunk_data_length(bytes);
 
         let chunk_type_bytes = &bytes[4..8];
         let chunk_type_arr: [u8; 4] = chunk_type_bytes.try_into().unwrap();
@@ -69,7 +74,6 @@ impl TryFrom<&[u8]> for Chunk {
         }
 
         let data: Vec<u8> = bytes[8..bytes.len() - 4].into();
-
         if data.len() != length as usize {
             return Err(anyhow!("Data length does not match specified length"));
         }
@@ -79,7 +83,7 @@ impl TryFrom<&[u8]> for Chunk {
         let check_sum_value = u32::from_be_bytes(last_four_bytes);
         
         if checksum != check_sum_value {
-            return Err(anyhow!("Data length does not match specified length"));
+            return Err(anyhow!("Checksum invalid"));
         }
 
         Ok(Chunk{
