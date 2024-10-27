@@ -52,6 +52,16 @@ impl Chunk {
         u32::from_be_bytes(length_bytes.try_into().unwrap())
     }
 
+    pub fn as_bytes(&self) -> Vec<u8> {
+        self.length.to_be_bytes()
+        .iter()
+        .chain(self.chunk_type.bytes().iter())
+        .chain(self.data.iter())
+        .chain(self.crc.to_be_bytes().iter())
+        .copied()
+        .collect()
+    }
+
 }
 
 impl TryFrom<&[u8]> for Chunk {
