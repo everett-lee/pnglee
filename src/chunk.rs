@@ -1,18 +1,17 @@
+use crate::chunk_type::ChunkType;
 use core::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::io::Bytes;
-use crate::chunk_type::ChunkType;
 
-use anyhow::Result;
 use anyhow::anyhow;
+use anyhow::Result;
 
 #[derive(Debug)]
 pub struct Chunk {
     length: u32,
     chunk_type: ChunkType,
     data: Vec<u8>,
-    crc: u32
+    crc: u32,
 }
 
 impl Chunk {
@@ -20,9 +19,19 @@ impl Chunk {
 
     pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         let length = data.len() as u32;
-        let combined: Vec<u8> = chunk_type.bytes().iter().chain(data.iter()).copied().collect();
+        let combined: Vec<u8> = chunk_type
+            .bytes()
+            .iter()
+            .chain(data.iter())
+            .copied()
+            .collect();
         let checksum = Chunk::CRC.checksum(&combined);
-        Chunk {length, chunk_type, data, crc: checksum}
+        Chunk {
+            length,
+            chunk_type,
+            data,
+            crc: checksum,
+        }
     }
 
     pub fn crc(&self) -> u32 {
@@ -53,20 +62,19 @@ impl Chunk {
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
-        self.length.to_be_bytes()
-        .iter()
-        .chain(self.chunk_type.bytes().iter())
-        .chain(self.data.iter())
-        .chain(self.crc.to_be_bytes().iter())
-        .copied()
-        .collect()
+        self.length
+            .to_be_bytes()
+            .iter()
+            .chain(self.chunk_type.bytes().iter())
+            .chain(self.data.iter())
+            .chain(self.crc.to_be_bytes().iter())
+            .copied()
+            .collect()
     }
-
 }
 
 impl TryFrom<&[u8]> for Chunk {
     type Error = anyhow::Error;
-
 
     fn try_from(bytes: &[u8]) -> Result<Self> {
         if bytes.len() < 12 {
@@ -91,16 +99,16 @@ impl TryFrom<&[u8]> for Chunk {
         let checksum = Chunk::CRC.checksum(&bytes[4..bytes.len() - 4]);
         let last_four_bytes: [u8; 4] = bytes[bytes.len() - 4..].try_into().unwrap();
         let check_sum_value = u32::from_be_bytes(last_four_bytes);
-        
+
         if checksum != check_sum_value {
             return Err(anyhow!("Checksum invalid"));
         }
 
-        Ok(Chunk{
+        Ok(Chunk {
             length,
             chunk_type,
             data,
-            crc: checksum
+            crc: checksum,
         })
     }
 }
@@ -131,14 +139,16 @@ mod tests {
             .chain(crc.to_be_bytes().iter())
             .copied()
             .collect();
-        
+
         Chunk::try_from(chunk_data.as_ref()).unwrap()
     }
 
     #[test]
     fn test_new_chunk() {
         let chunk_type = ChunkType::from_str("RuSt").unwrap();
-        let data = "This is where your secret message will be!".as_bytes().to_vec();
+        let data = "This is where your secret message will be!"
+            .as_bytes()
+            .to_vec();
         let chunk = Chunk::new(chunk_type, data);
         assert_eq!(chunk.length(), 42);
         assert_eq!(chunk.crc(), 2882656334);
@@ -233,9 +243,9 @@ mod tests {
             .chain(crc.to_be_bytes().iter())
             .copied()
             .collect();
-        
+
         let chunk: Chunk = TryFrom::try_from(chunk_data.as_ref()).unwrap();
-        
+
         let _chunk_string = format!("{}", chunk);
     }
 }

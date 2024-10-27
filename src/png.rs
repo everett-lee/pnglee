@@ -2,9 +2,7 @@ use core::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
-use crate::chunk;
 use crate::chunk::Chunk;
-use crate::chunk_type::ChunkType;
 
 use anyhow::anyhow;
 use anyhow::Result;
@@ -124,8 +122,6 @@ mod tests {
     }
 
     fn chunk_from_strings(chunk_type: &str, data: &str) -> Result<Chunk> {
-        use std::str::FromStr;
-
         let chunk_type = ChunkType::from_str(chunk_type)?;
         let data: Vec<u8> = data.bytes().collect();
 

@@ -1,15 +1,16 @@
-
 use core::fmt;
-use std::{fmt::{Display, Formatter}, str::FromStr};
+use std::{
+    fmt::{Display, Formatter},
+    str::FromStr,
+};
 
-use anyhow::Result;
 use anyhow::anyhow;
+use anyhow::Result;
 
 #[derive(Debug)]
 pub struct ChunkType {
-    b: [u8; 4]
+    b: [u8; 4],
 }
-
 
 impl ChunkType {
     pub fn bytes(&self) -> [u8; 4] {
@@ -17,8 +18,9 @@ impl ChunkType {
     }
 
     fn is_bytes_valid(bytes: [u8; 4]) -> bool {
-        bytes.into_iter()
-        .all(|b| (b >= 65 && b <= 90) || (b >= 97 && b <= 122))
+        bytes
+            .into_iter()
+            .all(|b| (b >= 65 && b <= 90) || (b >= 97 && b <= 122))
     }
 
     fn is_bit_unset(&self, byte_position: usize, bit_position: u8) -> bool {
@@ -27,7 +29,7 @@ impl ChunkType {
         // This is achieved by applying a mask of the bit at bit_position.
         // E.g. 82 in binary is 01010010
         // Applying mask with bit_position = 5, or 00100000
-        // Result is 0 
+        // Result is 0
         if byte_position >= 8 {
             panic!("Byte position must be between 0 and 3");
         }
@@ -46,16 +48,16 @@ impl ChunkType {
 
     pub fn is_public(&self) -> bool {
         self.is_bit_unset(1, 5)
-    }    
-    
+    }
+
     pub fn is_reserved_bit_valid(&self) -> bool {
         self.is_bit_unset(2, 5)
-    }   
+    }
 
     pub fn is_safe_to_copy(&self) -> bool {
         !self.is_bit_unset(3, 5)
     }
-    
+
     pub fn is_valid(&self) -> bool {
         self.is_reserved_bit_valid() && ChunkType::is_bytes_valid(self.bytes())
     }
@@ -63,7 +65,8 @@ impl ChunkType {
 
 impl Display for ChunkType {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let s = std::str::from_utf8(&self.b).expect("ChunkType should only contain valid UTF-8 characters");
+        let s = std::str::from_utf8(&self.b)
+            .expect("ChunkType should only contain valid UTF-8 characters");
         write!(f, "{}", s)
     }
 }
@@ -71,13 +74,12 @@ impl Display for ChunkType {
 impl TryFrom<[u8; 4]> for ChunkType {
     type Error = anyhow::Error;
 
-
     fn try_from(bytes: [u8; 4]) -> Result<Self> {
         if !ChunkType::is_bytes_valid(bytes) {
             return Err(anyhow!("Provided byte array not valid"));
         }
 
-        Ok(ChunkType{b: bytes})
+        Ok(ChunkType { b: bytes })
     }
 }
 
@@ -85,13 +87,16 @@ impl FromStr for ChunkType {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        let bytes: [u8; 4] = s.as_bytes().try_into().expect("Length of string should be 4");
+        let bytes: [u8; 4] = s
+            .as_bytes()
+            .try_into()
+            .expect("Length of string should be 4");
 
         if !ChunkType::is_bytes_valid(bytes) {
             return Err(anyhow!("Provided byte array not valid"));
         }
 
-        Ok(ChunkType {b: bytes})
+        Ok(ChunkType { b: bytes })
     }
 }
 
