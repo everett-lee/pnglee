@@ -7,7 +7,7 @@ use crate::chunk::Chunk;
 use anyhow::anyhow;
 use anyhow::Result;
 
-struct Png {
+pub struct Png {
     chunks: Vec<Chunk>,
 }
 
@@ -45,7 +45,7 @@ impl Png {
             .position(|c| c.chunk_type().to_string() == chunk_type)
     }
 
-    fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
+    pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
         match self.chunk_type_to_first_index(chunk_type) {
             Some(index) => self.chunks.get(index),
             None => None,
@@ -59,7 +59,7 @@ impl Png {
         }
     }
 
-    fn as_bytes(&self) -> Vec<u8> {
+    pub fn as_bytes(&self) -> Vec<u8> {
         let data_bytes: Vec<u8> = self.chunks.iter().flat_map(|c| c.as_bytes()).collect();
 
         Png::STANDARD_HEADER

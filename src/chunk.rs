@@ -88,7 +88,7 @@ impl TryFrom<&[u8]> for Chunk {
         let chunk_type = ChunkType::try_from(chunk_type_arr)?;
 
         if !chunk_type.is_valid() {
-            return Err(anyhow!("Chunk type not"));
+            return Err(anyhow!("Chunk type not valid"));
         }
 
         let data: Vec<u8> = bytes[8..bytes.len() - 4].into();
