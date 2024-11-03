@@ -3,8 +3,6 @@ use commands::Command;
 
 use clap::Parser;
 
-
-
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
@@ -18,9 +16,8 @@ pub struct Args {
     pub chunk_type: Option<String>,
 
     #[arg()]
-    pub message: Option<String>,    
+    pub message: Option<String>,
     #[arg()]
-    
     #[arg()]
     pub output_file: Option<String>,
 }
