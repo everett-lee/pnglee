@@ -28,9 +28,11 @@ impl ChunkType {
         // bit_position is zero-indexed from the right side
         // This is achieved by applying a mask of the bit at bit_position.
         // E.g. 82 in binary is 01010010
-        // Applying mask with bit_position = 5, or 00100000
-        // Result is 0
-        if byte_position >= 8 {
+        // Say we want to check bit at position 5 (zero-indexed)
+        // Use left shift 1 to create a mask with bit that position, yielding 00100000
+        // Then apply that mask with &, yielding 00000000
+        // So is_bit_unset = true
+        if byte_position >= 4 {
             panic!("Byte position must be between 0 and 3");
         }
 

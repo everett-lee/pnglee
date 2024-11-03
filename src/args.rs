@@ -17,7 +17,7 @@ pub struct Args {
 
     #[arg()]
     pub message: Option<String>,
+
     #[arg()]
-    #[arg()]
-    pub output_file: Option<String>,
+    pub output_file: Option<String>
 }
