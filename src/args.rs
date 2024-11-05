@@ -3,7 +3,7 @@ use commands::Command;
 
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[arg()]

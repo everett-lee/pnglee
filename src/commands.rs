@@ -80,7 +80,7 @@ impl Command {
         Ok(())
     }
 
-    pub fn handle_decode(args: Args) -> Result<()> {
+    pub fn handle_decode(args: Args) -> Result<String> {
         let file_path = args
             .file_path
             .ok_or_else(|| anyhow::anyhow!("No file path provided"))?;
@@ -96,12 +96,13 @@ impl Command {
             Some(c) => {
                 let secret_message = c.data_as_string()?;
                 println!("Super secret message: {}", secret_message);
+                return Ok(secret_message);
             }
             None => {
                 println!("No chunk found for type {}", &chunk_type);
+                return Ok(String::from(""));
             }
         }
-        Ok(())
     }
 
     pub fn handle_remove(args: Args) -> Result<()> {
@@ -120,7 +121,7 @@ impl Command {
         Ok(())
     }
 
-    pub fn handle_print(args: Args) -> Result<()> {
+    pub fn handle_print(args: Args) -> Result<Vec<String>> {
         let file_path = args
             .file_path
             .ok_or_else(|| anyhow::anyhow!("No file path provided"))?;
@@ -128,11 +129,17 @@ impl Command {
         let contents = fs::read(&file_path)?;
         let png = Png::try_from(contents.as_ref())?;
 
-        for chunk in png.chunks() {
-            if !chunk.chunk_type().is_critical() && !chunk.chunk_type().is_public() {
-                println!("{}", chunk);
-            }
+        let chunk_msgs: Vec<String> = png.chunks()
+            .iter()
+            .filter(|c| !c.chunk_type().is_critical() && !c.chunk_type().is_public())
+            .map(|c| c.to_string())
+            .collect();
+        
+
+        for chunk_msg in &chunk_msgs {
+            println!("{}", chunk_msg);
         }
-        Ok(())
+
+        Ok(chunk_msgs)
     }
 }

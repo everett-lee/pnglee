@@ -20,44 +20,38 @@ impl ChunkType {
     fn is_bytes_valid(bytes: [u8; 4]) -> bool {
         bytes
             .into_iter()
-            .all(|b| (b >= 65 && b <= 90) || (b >= 97 && b <= 122))
+            .all(|b| b.is_ascii_alphabetic())
     }
 
-    fn is_bit_unset(&self, byte_position: usize, bit_position: u8) -> bool {
-        // Check byte at byte_position in array to see if bit at bit_position is 0.
-        // bit_position is zero-indexed from the right side
-        // This is achieved by applying a mask of the bit at bit_position.
-        // E.g. 82 in binary is 01010010
-        // Say we want to check bit at position 5 (zero-indexed)
-        // Use left shift 1 to create a mask with bit that position, yielding 00100000
-        // Then apply that mask with &, yielding 00000000
-        // So is_bit_unset = true
+    pub fn is_byte_uppercase_char(&self, byte_position: usize) -> bool {
         if byte_position >= 4 {
             panic!("Byte position must be between 0 and 3");
         }
-
-        if bit_position >= 8 {
-            panic!("Bit position must be between 0 and 7");
-        }
         let byte = self.bytes()[byte_position];
-        let mask = 1 << bit_position;
-        byte & mask == 0
+        byte.is_ascii_uppercase()
     }
 
+    // critical if first byte is uppercase 
+    // e.g. RuSt
     pub fn is_critical(&self) -> bool {
-        self.is_bit_unset(0, 5)
+        self.is_byte_uppercase_char(0)
     }
 
+    // public if second byte is uppercase 
+    // e.g. rUSt
     pub fn is_public(&self) -> bool {
-        self.is_bit_unset(1, 5)
+        self.is_byte_uppercase_char(1)
     }
 
+    // spec states third byte must always be uppercase
     pub fn is_reserved_bit_valid(&self) -> bool {
-        self.is_bit_unset(2, 5)
+        self.is_byte_uppercase_char(2)
     }
 
+    // safe to copy if fourth byte lowercase
+    // e.g. ruSt
     pub fn is_safe_to_copy(&self) -> bool {
-        !self.is_bit_unset(3, 5)
+        !self.is_byte_uppercase_char(3)
     }
 
     pub fn is_valid(&self) -> bool {
