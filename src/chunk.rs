@@ -25,7 +25,9 @@ impl Chunk {
             .chain(data.iter())
             .copied()
             .collect();
+
         let checksum = Chunk::CRC.checksum(&combined);
+
         Chunk {
             length,
             chunk_type,
@@ -37,6 +39,7 @@ impl Chunk {
     pub fn crc(&self) -> u32 {
         let type_bytes = self.chunk_type.bytes();
         let combined: Vec<u8> = type_bytes.iter().chain(self.data.iter()).copied().collect();
+
         Chunk::CRC.checksum(&combined)
     }
 
@@ -53,6 +56,7 @@ impl Chunk {
             return Err(anyhow!("No data to convert to String"));
         }
         let res = String::from_utf8(self.data.clone());
+        
         Ok(res?)
     }
 
